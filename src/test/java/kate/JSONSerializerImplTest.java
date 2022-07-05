@@ -20,6 +20,16 @@ class JSONSerializerImplTest {
             this.x = x;
         }
     }
+
+    public static class Data0{
+        int x;
+        String str;
+
+        public Data0(int x, String str){
+            this.x = x;
+            this.str = str;
+        }
+    }
     @ParameterizedTest
     @MethodSource("objectsAndJSONs")
     public void shouldWriteAsString(Object o, String expected) {
@@ -38,8 +48,13 @@ class JSONSerializerImplTest {
                 Arguments.of(new Data(1),"{\"x\":1}"),
                 Arguments.of(new int[]{1,2},"[1,2]"),
                 Arguments.of(List.of(1,2,3),"[1,2,3]"),
+                Arguments.of(List.of("foo","bar"),"[\"foo\",\"bar\"]"),
                 Arguments.of(null,null),
-                Arguments.of(List.of(new Data(1),new Data(2)), "[{\"x\":1},{\"x\":2}]")
+                Arguments.of(1,"[1]"),
+                Arguments.of("foo","[\"foo\"]"),
+                Arguments.of(List.of(new Data(1),new Data(2)), "[{\"x\":1},{\"x\":2}]"),
+                Arguments.of(List.of(new Data(1),2), "[{\"x\":1},2]"),
+                Arguments.of(List.of(new Data0(1,"foo"),new Data0(2,"bar")), "[{\"x\":1,\"str\":\"foo\"},{\"x\":2,\"str\":\"bar\"}]")
         );
     }
 }
