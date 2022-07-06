@@ -13,11 +13,11 @@ public class JSONSerializerImpl implements JSONSerializer {
             return null;
         }
         Class<?> clazz = o.getClass();
-        if (clazz.equals(Integer.class)) {                 //Number.class ???
-            return "[" + o + "]";
+        if (Number.class.isAssignableFrom(clazz)) {
+            return o.toString();
         }
         if (clazz.equals(String.class)) {
-            return "[\"" + o + "\"]";
+            return o.toString();
         }
         if (clazz.isArray()) {
             return writeArrayAsString(o);
