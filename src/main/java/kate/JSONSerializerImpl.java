@@ -28,16 +28,6 @@ public class JSONSerializerImpl implements JSONSerializer {
         } else {
             return obj.toString();
         }
-
-//        if (obj instanceof JSONArray) {
-//            JSONArray obj1 = (JSONArray) obj;
-//            return obj1.toJSONString();
-//        } else if (obj instanceof JSONObject) {
-//            JSONObject obj2 = (JSONObject) obj;
-//            return obj2.toJSONString();
-//        } else {
-//            return obj.toString();
-//        }
     }
 
     private Object convertToValidJSONElement(Object o) throws IllegalAccessException {
