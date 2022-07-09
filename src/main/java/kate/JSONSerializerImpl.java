@@ -1,6 +1,7 @@
 package kate;
 
 import org.json.simple.JSONArray;
+import org.json.simple.JSONAware;
 import org.json.simple.JSONObject;
 
 import java.lang.reflect.Array;
@@ -22,15 +23,21 @@ public class JSONSerializerImpl implements JSONSerializer {
             return null;
         }
         Object obj = convertToValidJSONElement(o);
-        if (obj instanceof JSONArray) {
-            JSONArray obj1 = (JSONArray) obj;
-            return obj1.toJSONString();
-        } else if (obj instanceof JSONObject) {
-            JSONObject obj2 = (JSONObject) obj;
-            return obj2.toJSONString();
+        if(obj instanceof JSONAware){
+            return ((JSONAware)obj).toJSONString();
         } else {
             return obj.toString();
         }
+
+//        if (obj instanceof JSONArray) {
+//            JSONArray obj1 = (JSONArray) obj;
+//            return obj1.toJSONString();
+//        } else if (obj instanceof JSONObject) {
+//            JSONObject obj2 = (JSONObject) obj;
+//            return obj2.toJSONString();
+//        } else {
+//            return obj.toString();
+//        }
     }
 
     private Object convertToValidJSONElement(Object o) throws IllegalAccessException {
