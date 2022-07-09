@@ -8,31 +8,6 @@ import java.lang.reflect.Field;
 import java.util.Collection;
 
 public class JSONSerializerImpl implements JSONSerializer {
-    private String writeAsString0(Object o) throws IllegalAccessException {
-        if (o == null) {
-            return null;
-        }
-        Class<?> clazz = o.getClass();
-        if (Number.class.isAssignableFrom(clazz)) {
-            return o.toString();
-        }
-        if (clazz.equals(String.class)) {
-            return o.toString();
-        }
-        if (clazz.isArray()) {
-            return writeArrayAsString(o);
-        } else if (Collection.class.isAssignableFrom(clazz)) {
-            return writeCollectionAsString(o);
-        } else {
-            JSONObject jsonObj = new JSONObject();
-            Field[] fields = clazz.getDeclaredFields();
-            for (Field field : fields) {
-                jsonObj.put(field.getName(), field.get(o));
-            }
-            return jsonObj.toJSONString();
-        }
-    }
-
     @Override
     public String writeAsString(Object o) {
         try {
@@ -42,30 +17,80 @@ public class JSONSerializerImpl implements JSONSerializer {
         }
     }
 
-    public String writeArrayAsString(Object o) {
+    private String writeAsString0(Object o) throws IllegalAccessException {
+        if (o == null) {
+            return null;
+        }
+        Object obj = convertToValidJSONElement(o);
+        if (obj instanceof JSONArray) {
+            JSONArray obj1 = (JSONArray) obj;
+            return obj1.toJSONString();
+        } else if (obj instanceof JSONObject) {
+            JSONObject obj2 = (JSONObject) obj;
+            return obj2.toJSONString();
+        } else {
+            return obj.toString();
+        }
+    }
+
+    private Object convertToValidJSONElement(Object o) throws IllegalAccessException {
+        Object json;
+        if (isCollection(o.getClass())) {
+            json = collectionToJSONArray((Collection<?>) o);
+        } else if (o.getClass().isArray()) {
+            json = arrayToJSONArray(o);
+        } else if (isPrimitive(o.getClass())) {
+            json = o;
+        } else {
+            json = toJSONObject(o);
+        }
+        return json;
+    }
+
+    private JSONObject toJSONObject(Object o) throws IllegalAccessException {
+        JSONObject jsonObj = new JSONObject();
+        Class<?> aClass = o.getClass();
+        Field[] fields = aClass.getDeclaredFields();
+        for (Field field : fields) {
+            Object fieldVal = field.get(o);
+            jsonObj.put(field.getName(), convertToValidJSONElement(fieldVal));
+        }
+        return jsonObj;
+    }
+
+    private JSONArray arrayToJSONArray(Object o) throws IllegalAccessException {
         int size = Array.getLength(o);
         JSONArray jsonArr = new JSONArray();
         for (int i = 0; i < size; i++) {
-            jsonArr.add(Array.get(o, i));
+            Object element = Array.get(o, i);
+            jsonArr.add(convertToValidJSONElement(element));
         }
-        return jsonArr.toJSONString();
+        return jsonArr;
     }
 
-    public String writeCollectionAsString(Object o) throws IllegalAccessException {
+    private JSONArray collectionToJSONArray(Collection<?> collection) throws IllegalAccessException {
         JSONArray jsonArr = new JSONArray();
-        Collection<?> collection = (Collection<?>) o;
-        for (Object o1 : collection) {
-            JSONObject jsonObj = new JSONObject();
-            if (o1.getClass().equals(Integer.class) || o1.getClass().equals(String.class)) {
-                jsonArr.add(o1);
-            } else {
-                Field[] declaredFields = o1.getClass().getDeclaredFields();
-                for (Field field : declaredFields) {
-                    jsonObj.put(field.getName(), field.get(o1));
-                }
-                jsonArr.add(jsonObj);
-            }
+        for (Object o : collection) {
+            jsonArr.add(convertToValidJSONElement(o));
         }
-        return jsonArr.toJSONString();
+        return jsonArr;
+    }
+
+    private boolean isCollection(Class<?> clazz) {
+        return Collection.class.isAssignableFrom(clazz);
+    }
+
+    private boolean isPrimitive(Class<?> clazz) {
+//        if(clazz.isPrimitive()){
+//            return true;
+//        }
+//        if(Number.class.isAssignableFrom(clazz)){
+//            return true;
+//        }
+//        if(clazz.equals(String.class)){
+//            return true;
+//        }
+//        return false;
+        return clazz.isPrimitive() || Number.class.isAssignableFrom(clazz) || clazz.equals(String.class);
     }
 }

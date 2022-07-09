@@ -93,7 +93,7 @@ class JSONSerializerImplTest {
             }
         }
         return Stream.of(
-                Arguments.of(new DataComplex(new Data(2)), "")
+                Arguments.of(new DataComplex(new Data(2)), "{\"d\":{\"x\":2}}")
         );
     }
 
