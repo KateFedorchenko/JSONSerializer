@@ -1,5 +1,6 @@
 package kate;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -11,6 +12,15 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.*;
 
 class JSONDeserializerImplTest {
+    @Test
+    public void test0() {
+        class Data{
+            int x;
+        }
+        JSONDeserializer jsonDeserializer = new oldJSONDeserializerImpl();
+        jsonDeserializer.read("{\"x\":42}",Data.class);
+    }
+
     public static class DataString {
         String str;
 
@@ -34,6 +44,7 @@ class JSONDeserializerImplTest {
             return Objects.hash(str);
         }
     }
+
     public static class DataInteger {
         long param1;
 
@@ -48,7 +59,7 @@ class JSONDeserializerImplTest {
     @ParameterizedTest
     @MethodSource({"testSimple", "objectsWithFields", "nestedObjects", "collectionWithObjects", "simpleCollection"})
     public void test(String json, Object expected) {
-        JSONDeserializer deserializer = new JSONDeserializerImpl();
+        JSONDeserializer deserializer = new oldJSONDeserializerImpl();
         Class<?> clazz;
         if (expected == null) {
             clazz = Object.class;
@@ -67,50 +78,48 @@ class JSONDeserializerImplTest {
                 Arguments.of("true", true)
         );
     }
+
     static Stream<Arguments> objectsWithFields() {
         return Stream.of(
-//                Arguments.of("{\"str\":\"foo\"}", new DataString("foo")),
-//                Arguments.of("{\"str\":\"foo\"}", new DataString("foo")),
-                /**
-                 * new test
-                 **/
+                Arguments.of("{\"str\":\"foo\"}", new DataString("foo")),
+                Arguments.of("{\"str\":\"foo\"}", new DataString("foo")),
                 Arguments.of("{\"param1\":1}", new DataInteger(1))
         );
     }
-//
-//    /**
-//     * Test for collections with objects
-//     **/
-//    public static Stream<Arguments> collectionWithObjects() {
-//        return Stream.of(
-//                Arguments.of(List.of("[{\"str\":\"params\"},{\"str\":\"logs\"}]", new DataString("params"), new DataString("logs"))),
-//                Arguments.of(List.of("[{\"param1\":1},{\"param1\":2}]", new DataInteger(1), new DataInteger(2)))
-//        );
-//    }
-//
-//    /**
-//     * Test for simple collection with data types: String, int
-//     **/
-//    public static Stream<Arguments> simpleCollection() {
-//        return Stream.of(
-//                Arguments.of("[1,2,3]", List.of(1,2,3)),        // why Expected :[1, 2, 3]?
-//                Arguments.of("[\"foo\",\"bar\"]", List.of("foo", "bar"))
-//        );
-//    }
-//
-//    /**
-//     * Test for nested objects
-//     **/
-//    public static Stream<Arguments> nestedObjects() {
-//        class DataComplex {
-//            DataString dataString;
-//
-//            public DataComplex(DataString dataString) {
-//                this.dataString = dataString;
-//            }
-//        }
-//        return Stream.of(
-//                Arguments.of("{\"dataString\":{\"str\":\"results\"}}", new DataComplex(new DataString("results")))
-//        );
-//    }
+
+    /**
+     * Test for collections with objects
+     **/
+    public static Stream<Arguments> collectionWithObjects() {
+        return Stream.of(
+                Arguments.of(List.of("[{\"str\":\"params\"},{\"str\":\"logs\"}]", new DataString("params"), new DataString("logs"))),
+                Arguments.of(List.of("[{\"param1\":1},{\"param1\":2}]", new DataInteger(1), new DataInteger(2)))
+        );
+    }
+
+    /**
+     * Test for simple collection with data types: String, int
+     **/
+    public static Stream<Arguments> simpleCollection() {
+        return Stream.of(
+                Arguments.of("[1,2,3]", List.of(1,2,3)),        // why Expected :[1, 2, 3]?
+                Arguments.of("[\"foo\",\"bar\"]", List.of("foo", "bar"))
+        );
+    }
+
+    /**
+     * Test for nested objects
+     **/
+    public static Stream<Arguments> nestedObjects() {
+        class DataComplex {
+            DataString dataString;
+
+            public DataComplex(DataString dataString) {
+                this.dataString = dataString;
+            }
+        }
+        return Stream.of(
+                Arguments.of("{\"dataString\":{\"str\":\"results\"}}", new DataComplex(new DataString("results")))
+        );
+    }
 }
